@@ -1,0 +1,485 @@
+I got this <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CosmoAi: Universe Sandbox</title>
+<style>
+:root{
+  --bg:#020617;
+  --panel:rgba(15,23,42,0.65);
+  --border:rgba(148,163,184,0.14);
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --cyan:#22d3ee;
+  --purple:#a855f7;
+  --amber:#fde047;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
+  overflow-x:hidden;
+}
+#starfield{position:fixed; inset:0; width:100%; height:100%; z-index:0;}
+.app{position:relative; z-index:2; max-width:1440px; margin:0 auto; padding:20px 16px 40px;}
+.header{text-align:center; margin-bottom:24px;}
+.header h1{
+  margin:0; font-weight:900; letter-spacing:-0.02em;
+  font-size:clamp(2rem,5vw,3.2rem);
+  background:linear-gradient(90deg, #7dd3fc 0%, var(--cyan) 30%, var(--purple) 70%, #c084fc 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter: drop-shadow(0 6px 30px rgba(124,58,237,0.25));
+}
+.header p{margin:10px auto 0; max-width:820px; color:var(--muted); font-size:clamp(0.95rem,1.8vw,1.08rem); line-height:1.5;}
+.header p span{color:#cbd5e1; font-weight:600; white-space:nowrap}
+.grid{display:grid; grid-template-columns:320px 1fr 340px; gap:18px; align-items:start;}
+@media (max-width:1100px){.grid{grid-template-columns:1fr 1fr;} .center{grid-column:1/-1; order:-1;}}
+@media (max-width:720px){.grid{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--panel);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border:1px solid var(--border);
+  border-radius:20px; padding:18px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.card h2{margin:0 0 14px; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.14em; color:#7dd3ee; font-weight:800;}
+.scale-value{font-size:1.15rem; margin-bottom:8px; color:#fff}
+.scale-value strong{font-weight:800;}
+.scale-value sup{font-size:0.7em; opacity:0.9}
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:8px; border-radius:999px;
+  background:linear-gradient(90deg, rgba(34,211,238,0.35), rgba(168,85,247,0.35));
+  outline:none; margin:14px 0; position:relative;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #fff, #67e8f9 40%, #0ea5e9 70%);
+  border:2px solid #020617; box-shadow:0 0 16px rgba(34,211,238,0.7), 0 0 40px rgba(168,85,247,0.3);
+  cursor:pointer; margin-top:-2px; transition:transform 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:active{transform:scale(1.1);}
+input[type=range]::-moz-range-thumb{
+  width:22px; height:22px; border-radius:50%; background:#22d3ee; border:2px solid #020617;
+  box-shadow:0 0 16px rgba(34,211,238,0.7); cursor:pointer;
+}
+.scale-markers{position:relative; height:38px; margin-top:4px;}
+.marker{position:absolute; top:0; transform:translateX(-50%); text-align:center; width:70px; pointer-events:none;}
+.marker .tick{width:2px; height:10px; background:linear-gradient(#64748b,#334155); margin:0 auto 4px; border-radius:2px; opacity:0.8;}
+.marker .label{font-size:10px; color:#a8b3c7; white-space:nowrap; letter-spacing:0.02em;}
+
+.mixer-row{margin:14px 0;}
+.mixer-row label{display:flex; justify-content:space-between; align-items:center; font-size:0.93rem; color:#d1d9e6; margin-bottom:6px;}
+.mixer-row label span{color:var(--cyan); font-variant-numeric:tabular-nums; font-weight:700; min-width:42px; text-align:right;}
+.mixer-row small{display:block; color:#7c8aa3; font-size:0.75rem; margin-top:-2px;}
+
+.presets{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px;}
+.preset{
+  padding:10px; border-radius:12px; border:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  color:#e2e8f0; font-size:0.88rem; font-weight:650; cursor:pointer; transition:0.2s;
+}
+.preset:hover{border-color:rgba(125,211,252,0.5); transform:translateY(-1px); box-shadow:0 6px 18px rgba(34,211,238,0.15);}
+.preset.active{background:linear-gradient(90deg, rgba(34,211,238,0.22), rgba(168,85,247,0.22)); border-color:rgba(125,211,252,0.7); color:#fff; box-shadow:0 0 20px rgba(124,58,237,0.25) inset;}
+
+.center .card{padding:12px;}
+.canvas-wrap{
+  position:relative; border-radius:16px; overflow:hidden; background:#020617;
+  border:1px solid var(--border);
+  background-image:
+    radial-gradient(900px 400px at 50% -10%, rgba(56,189,248,0.12), transparent 60%),
+    radial-gradient(700px 500px at 90% 120%, rgba(168,85,247,0.14), transparent 60%),
+    radial-gradient(600px 300px at 10% 110%, rgba(14,165,233,0.1), transparent 60%);
+}
+#universe{display:block; width:100%; height:auto;}
+
+.canvas-overlay{
+  position:absolute; left:12px; top:12px; display:flex; gap:8px; flex-wrap:wrap; pointer-events:none;
+}
+.chip{
+  padding:6px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:0.04em;
+  background:rgba(2,6,23,0.6); border:1px solid var(--border); color:#c7d2e0; backdrop-filter: blur(6px);
+}
+.chip b{color:#fff}
+
+.toggle{display:flex; background:rgba(0,0,0,0.35); border:1px solid var(--border); border-radius:12px; padding:3px; gap:3px;}
+.toggle button{flex:1; padding:9px 10px; border:0; background:transparent; color:#9aa6bd; border-radius:9px; font-weight:700; font-size:0.85rem; cursor:pointer; transition:0.18s;}
+.toggle button.active{background:linear-gradient(90deg, rgba(34,211,238,0.28), rgba(168,85,247,0.28)); color:#fff; box-shadow:inset 0 0 0 1px rgba(125,211,252,0.35);}
+
+#dataDisplay{margin-top:12px; font-size:0.93rem; color:#cbd5e1; line-height:1.55;}
+#dataDisplay h4{margin:0 0 8px; color:#fff; font-size:1.02rem;}
+#dataDisplay ul{margin:6px 0 0; padding-left:18px;}
+#dataDisplay li{margin:4px 0;}
+#dataDisplay .src{margin-top:8px; font-size:0.78rem; color:#7d8bad;}
+
+#learnContent{transition:opacity 0.25s;}
+#learnContent h3{margin:2px 0 8px; font-size:1.18rem; color:#fff; letter-spacing:-0.01em;}
+#learnContent p{margin:0 0 10px; color:#cbd5e1; line-height:1.6;}
+.learn-fact{margin-top:12px; padding:11px 12px; border-radius:12px; background:linear-gradient(180deg, rgba(2,6,23,0.7), rgba(2,6,23,0.4)); border:1px solid var(--border); font-size:0.88rem; color:#b9c6e6;}
+.learn-fact b{color:#e2e8f0}
+
+.footer-note{text-align:center; margin-top:22px; color:#64748b; font-size:0.8rem;}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+<div class="app">
+  <header class="header">
+    <h1>CosmoAi: Universe Sandbox</h1>
+    <p>See how big the universe is. Mix particles, gases, dust, and dark matter. Watch it unfold. <span>by Jesse Shangraw</span></p>
+  </header>
+
+  <main class="grid">
+    <aside class="left">
+      <div class="card">
+        <h2>Scale</h2>
+        <div class="scale-value" id="scaleValue"><strong>10<sup>0</sup> m</strong> — Human scale</div>
+        <input id="scaleSlider" type="range" min="-35" max="27" step="0.1" value="0">
+        <div class="scale-markers" id="scaleMarkers"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>Particle Mixer</h2>
+        <div class="mixer-row">
+          <label>Hydrogen <span id="hVal">70%</span></label>
+          <input id="hydrogen" type="range" min="0" max="100" value="70">
+          <small>Lightest element, fuels stars</small>
+        </div>
+        <div class="mixer-row">
+          <label>Helium <span id="heVal">25%</span></label>
+          <input id="helium" type="range" min="0" max="100" value="25">
+          <small>Second most abundant</small>
+        </div>
+        <div class="mixer-row">
+          <label>Dust <span id="dustVal">10%</span></label>
+          <input id="dust" type="range" min="0" max="100" value="10">
+          <small>Carbon, silicates, ice grains</small>
+        </div>
+        <div class="mixer-row">
+          <label>Dark Matter <span id="darkVal">25%</span></label>
+          <input id="darkMatter" type="range" min="0" max="100" value="25">
+          <small>Invisible cosmic scaffold</small>
+        </div>
+        <div class="mixer-row">
+          <label>Electrons/Protons <span id="epVal">40%</span></label>
+          <input id="ep" type="range" min="0" max="100" value="40">
+          <small>Ionized plasma activity</small>
+        </div>
+        <div class="presets">
+          <button class="preset" data-preset="lhc">LHC</button>
+          <button class="preset" data-preset="voyager">Voyager 1</button>
+          <button class="preset" data-preset="early">Early Universe</button>
+          <button class="preset active" data-preset="human">Human</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="center">
+      <div class="card">
+        <div class="canvas-wrap">
+          <canvas id="universe" width="800" height="400"></canvas>
+          <div class="canvas-overlay">
+            <div class="chip" id="chipScale"><b>Scale:</b> 1 m</div>
+            <div class="chip" id="chipMode"><b>Mode:</b> Open Data</div>
+          </div>
+        </div>
+      <div class="footer-note">Tip: drag the scale to zoom from quantum foam to cosmic web. Change the mix to reshape the simulation.</div>
+    </section>
+
+    <aside class="right">
+      <div class="card">
+        <h2>Data Source</h2>
+        <div class="toggle">
+          <button id="openDataBtn" class="active">Open Data</button>
+          <button id="liveSimBtn">Live Simulation</button>
+        </div>
+        <div id="dataDisplay"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>Learn</h2>
+        <div id="learnContent"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  const $=id=>document.getElementById(id);
+  const scaleSlider=$('scaleSlider'), scaleValue=$('scaleValue');
+  const hydrogen=$('hydrogen'), helium=$('helium'), dust=$('dust'), darkMatter=$('darkMatter'), ep=$('ep');
+  const hVal=$('hVal'), heVal=$('heVal'), dustVal=$('dustVal'), darkVal=$('darkVal'), epVal=$('epVal');
+  const openDataBtn=$('openDataBtn'), liveSimBtn=$('liveSimBtn'), dataDisplay=$('dataDisplay'), learnContent=$('learnContent');
+  const chipScale=$('chipScale'), chipMode=$('chipMode');
+  const starCanvas=$('starfield'), sctx=starCanvas.getContext('2d');
+  const universe=$('universe'), uctx=universe.getContext('2d');
+
+  let scaleExp=0, mix={}, particles=[], darkNodes=[], mode='open', fps=0;
+  let universeW=800, universeH=400;
+
+  const markers=[
+    {exp:-35,label:"Planck"},
+    {exp:-15,label:"Proton"},
+    {exp:-10,label:"Atom"},
+    {exp:0,label:"Human"},
+    {exp:7,label:"Earth"},
+    {exp:13,label:"Solar Sys"},
+    {exp:21,label:"Milky Way"},
+    {exp:27,label:"Universe"},
+  ];
+  const markerEl=$('scaleMarkers');
+  markers.forEach(m=>{
+    const left=((m.exp+35)/(62))*100;
+    const el=document.createElement('div'); el.className='marker'; el.style.left=left+'%';
+    el.innerHTML=`<div class="tick"></div><div class="label">${m.label}</div>`;
+    markerEl.appendChild(el);
+  });
+
+  const presets={
+    lhc:{scale:-18, hydrogen:5, helium:0, dust:0, dark:0, ep:100},
+    voyager:{scale:13.38, hydrogen:70, helium:28, dust:5, dark:5, ep:20},
+    early:{scale:26, hydrogen:75, helium:25, dust:0, dark:85, ep:50},
+    human:{scale:0, hydrogen:62, helium:0, dust:30, dark:0, ep:70}
+  };
+
+  function resizeStars(){
+    starCanvas.width=innerWidth; starCanvas.height=innerHeight;
+    stars=Array.from({length:320},()=>({x:Math.random()*starCanvas.width, y:Math.random()*starCanvas.height, r:Math.random()*1.4+0.2, a:Math.random()*0.5+0.3, tw:Math.random()*0.015+0.003}));
+  }
+  let stars=[];
+  function animateStars(){
+    sctx.clearRect(0,0,starCanvas.width,starCanvas.height);
+    const t=Date.now()*0.001;
+    stars.forEach(s=>{
+      s.a=0.4+0.35*Math.sin(t*s.tw*60 + s.x*0.01);
+      sctx.beginPath(); sctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      sctx.fillStyle=`rgba(226,232,240,${s.a})`; sctx.fill();
+    });
+    requestAnimationFrame(animateStars);
+  }
+
+  function resizeUniverse(){
+    const wrap=universe.parentElement; const w=wrap.clientWidth;
+    const h=Math.min(460, Math.max(280, w*0.52));
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    universe.width=w*dpr; universe.height=h*dpr;
+    universe.style.width=w+'px'; universe.style.height=h+'px';
+    uctx.setTransform(1,0,0,1,0,0); uctx.scale(dpr,dpr);
+    universeW=w; universeH=h;
+  }
+
+  function createParticle(pick){
+    const speed=0.3+Math.random()*0.6;
+    const ang=Math.random()*Math.PI*2;
+    return {
+      x:Math.random()*universeW, y:Math.random()*universeH,
+      vx:Math.cos(ang)*speed, vy:Math.sin(ang)*speed,
+      type:pick.type, color:pick.color,
+      size: pick.type==='dust'? 3.2+Math.random()*1.2 : pick.type==='he'?2.4 : pick.type==='h'?2.1 : 1.4
+    };
+  }
+
+  function updateParticlesFromMix(){
+    const total=innerWidth<700?140:280;
+    particles=[];
+    const weights=[
+      {type:'h', val:mix.hydrogen, color:'#38bdf8'},
+      {type:'he', val:mix.helium, color:'#fde047'},
+      {type:'dust', val:mix.dust, color:'#fb923c'},
+      {type:'ep', val:mix.ep, color:'#e2e8f0'}
+    ];
+    const sum=weights.reduce((a,b)=>a+b.val,0)||1;
+    for(let i=0;i<total;i++){
+      let r=Math.random()*sum, acc=0, pick=weights[0];
+      for(const w of weights){acc+=w.val; if(r<=acc){pick=w; break;}}
+      particles.push(createParticle(pick));
+    }
+    const darkCount=Math.max(6, Math.round(mix.dark/100*36));
+    darkNodes=Array.from({length:darkCount},()=>({
+      x:Math.random()*universeW, y:Math.random()*universeH,
+      vx:(Math.random()-0.5)*0.18, vy:(Math.random()-0.5)*0.18
+    }));
+  }
+
+  function updateMixDisplays(){
+    hVal.textContent=hydrogen.value+'%';
+    heVal.textContent=helium.value+'%';
+    dustVal.textContent=dust.value+'%';
+    darkVal.textContent=darkMatter.value+'%';
+    epVal.textContent=ep.value+'%';
+    mix={hydrogen:+hydrogen.value, helium:+helium.value, dust:+dust.value, dark:+darkMatter.value, ep:+ep.value};
+  }
+
+  function formatScale(exp){
+    const v=Math.pow(10,exp);
+    if(v>=1e24) return (v/1e24).toFixed(1)+' Ym';
+    if(v>=1e21) return (v/1e21).toFixed(1)+' Zm';
+    if(v>=1e18) return (v/1e18).toFixed(1)+' Em';
+    if(v>=1e15) return (v/1e15).toFixed(1)+' Pm';
+    if(v>=1e12) return (v/1e12).toFixed(1)+' Tm';
+    if(v>=1e9) return (v/1e9).toFixed(1)+' Gm';
+    if(v>=1e6) return (v/1e6).toFixed(1)+' Mm';
+    if(v>=1e3) return (v/1e3).toFixed(1)+' km';
+    if(v>=1) return v.toFixed(1)+' m';
+    if(v>=1e-3) return (v*1e3).toFixed(1)+' mm';
+    if(v>=1e-6) return (v*1e6).toFixed(1)+' µm';
+    if(v>=1e-9) return (v*1e9).toFixed(1)+' nm';
+    return '10<sup>'+exp.toFixed(1)+'</sup> m';
+  }
+
+  function updateScaleDisplay(){
+    scaleExp=parseFloat(scaleSlider.value);
+    const nearest=markers.reduce((p,c)=>Math.abs(c.exp-scaleExp)<Math.abs(p.exp-scaleExp)?c:p);
+    scaleValue.innerHTML=`<strong>10<sup>${scaleExp.toFixed(1)}</sup> m</strong> — ${nearest.label} scale`;
+    chipScale.innerHTML=`<b>Scale:</b> ${formatScale(scaleExp)}`;
+    updateLearn(); updateDataDisplay();
+  }
+
+  function getScaleInfo(exp){
+    if(exp<-30) return {title:"Planck Foam", desc:"At 1.6×10⁻³⁵ m, space-time itself bubbles with quantum fluctuations. Our classical picture breaks down here."};
+    if(exp<-16) return {title:"Quarks & LHC Energies", desc:"Protons (~8×10⁻¹⁶ m) are bags of quarks held by gluons. The LHC probes this realm at 13.6 TeV."};
+    if(exp<-12) return {title:"Atomic Nucleus", desc:"Nuclei are femtometers across. Strong force binds protons and neutrons."};
+    if(exp<-9) return {title:"Atoms", desc:"About 10⁻¹⁰ m across. Electrons form clouds, chemistry emerges."};
+    if(exp<-6) return {title:"Molecules & Viruses", desc:"Nanometers. DNA is ~2 nm wide, viruses ~20-300 nm."};
+    if(exp<-3) return {title:"Microbes", desc:"Microns. Bacteria live here, Brownian motion dominates."};
+    if(exp<1) return {title:"Human Scale", desc:"Meters. You are here. Solids, fluids, and everyday physics."};
+    if(exp<4) return {title:"Buildings to Mountains", desc:"10 to 10,000 m. Architecture meets geology."};
+    if(exp<7.5) return {title:"Earth Scale", desc:"Earth is 1.27×10⁷ m across. Atmosphere is a thin skin."};
+    if(exp<10) return {title:"Near-Earth Space", desc:"Satellites orbit at hundreds of km to 36,000 km."};
+    if(exp<13) return {title:"Inner Solar System", desc:"Earth to Sun is 1.5×10¹¹ m (1 AU)."};
+    if(exp<14.5) return {title:"Voyager Distances", desc:"Voyager 1 is ~2.5×10¹³ m away (>160 AU), in interstellar space."};
+    if(exp<17) return {title:"Oort Cloud", desc:"Comet reservoir out to ~10¹⁶ m (~1 light-year)."};
+    if(exp<20) return {title:"Interstellar", desc:"Nearest star Proxima is 4×10¹⁶ m away (4.2 ly)."};
+    if(exp<22.5) return {title:"Milky Way", desc:"Our galaxy is ~9×10²⁰ m (100,000 ly) across, 100-400 billion stars."};
+    if(exp<25) return {title:"Local Group", desc:"Galaxy clusters spanning megaparsecs, bound by dark matter."};
+    return {title:"Observable Universe", desc:"~8.8×10²⁶ m across. Cosmic microwave background shows the Big Bang's afterglow."};
+  }
+
+  function updateLearn(){
+    learnContent.style.opacity=0;
+    setTimeout(()=>{
+      const info=getScaleInfo(scaleExp);
+      let comp="";
+      if(mix.dark>60) comp="Dark matter dominates the gravitational web, guiding galaxies into filaments.";
+      else if(mix.hydrogen>60 && mix.helium>20) comp="Primordial mix like the early universe—mostly H and He, perfect for star formation.";
+      else if(mix.ep>70) comp="Highly ionized plasma. Electrons and protons zip freely, as in stars or accelerators.";
+      else if(mix.dust>40) comp="Dust-rich environment. Grains seed planet formation and scatter starlight.";
+      else if(mix.hydrogen>50) comp="Hydrogen-rich, fuel for fusion. This is the stuff stars are made of.";
+      else comp="Balanced mix—change sliders to explore different cosmic environments.";
+      learnContent.innerHTML=`
+        <h3>${info.title}</h3>
+        <p>${info.desc}</p>
+        <p>At this zoom, particles behave ${scaleExp<-12?'quantum and jittery':scaleExp>12?'with slow, gravity-driven orbits':'with gentle Brownian motion'}. Adjust composition to see structure change.</p>
+        <div class="learn-fact"><b>Composition insight:</b> ${comp}</div>
+      `;
+      learnContent.style.opacity=1;
+    },180);
+  }
+
+  function updateDataDisplay(){
+    if(mode==='open'){
+      let html='';
+      if(scaleExp>-19 && scaleExp<-14){
+        html=`<h4>LHC — CERN Open Data</h4>
+        <ul><li>Energy: 13.6 TeV per collision</li><li>Proton size: ~0.84 fm (8.4×10⁻¹⁶ m)</li><li>Inside magnets: 1.9 K, colder than space</li><li>Data rate: ~1 PB/s filtered</li></ul>
+        <div class="src">Source: CERN Open Data Portal</div>`;
+      }else if(scaleExp>13 && scaleExp<14.5){
+        html=`<h4>Voyager 1 — NASA</h4>
+        <ul><li>Distance: ~24.9 billion km (166 AU)</li><li>Speed: 17 km/s away from Sun</li><li>In interstellar medium since 2012</li><li>Local H density: ~0.1 atoms/cm³</li></ul>
+        <div class="src">Source: NASA JPL HORIZONS</div>`;
+      }else if(scaleExp>25){
+        html=`<h4>Early Universe — Planck CMB</h4>
+        <ul><li>Age at CMB: 380,000 years</li><li>Composition: 75% H, 25% He</li><li>Dark matter: ~26%, Dark energy: ~69%</li><li>Temperature then: ~3,000 K</li></ul>
+        <div class="src">Source: ESA Planck Legacy Archive</div>`;
+      }else if(scaleExp>-1 && scaleExp<2){
+        html=`<h4>Human Scale — Open Physiology</h4>
+        <ul><li>Reference: ~1-2 m tall</li><li>Body ~60% water (H₂O)</li><li>Atoms in body: ~7×10²⁷</li><li>Cells: ~30 trillion</li></ul>
+        <div class="src">Conceptual composite</div>`;
+      }else{
+        html=`<h4>Open Astrophysics at ${formatScale(scaleExp)}</h4>
+        <p>Zoom to labeled markers to load curated datasets: LHC (~10⁻¹⁸ m), Atoms (10⁻¹⁰ m), Voyager (~10¹³ m), Milky Way (~10²¹ m).</p>`;
+      }
+      dataDisplay.innerHTML=html;
+    }else{
+      dataDisplay.innerHTML=`<h4>Live Simulation</h4>
+      <ul><li>Particles: ${particles.length}</li><li>Dark nodes: ${darkNodes.length}</li><li>FPS: ${fps}</li><li>Mix H/He/Dark: ${mix.hydrogen}% / ${mix.helium}% / ${mix.dark}%</li></ul>`;
+    }
+  }
+
+  let last=performance.now(), frames=0;
+  function animateUniverse(){
+    frames++; const now=performance.now();
+    if(now-last>1000){fps=frames; frames=0; last=now; if(mode==='live') updateDataDisplay();}
+    uctx.fillStyle='rgba(2,6,23,0.22)'; uctx.fillRect(0,0,universeW,universeH);
+
+    if(mix.dark>5){
+      for(let i=0;i<darkNodes.length;i++){
+        const a=darkNodes[i]; a.x+=a.vx; a.y+=a.vy;
+        if(a.x<0||a.x>universeW) a.vx*=-1;
+        if(a.y<0||a.y>universeH) a.vy*=-1;
+        for(let j=i+1;j<darkNodes.length;j++){
+          const b=darkNodes[j]; const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+          if(d<120){
+            const alpha=(1-d/120)*0.22*(mix.dark/100);
+            uctx.strokeStyle=`rgba(168,85,247,${alpha})`; uctx.lineWidth=1;
+            uctx.beginPath(); uctx.moveTo(a.x,a.y); uctx.lineTo(b.x,b.y); uctx.stroke();
+          }
+        }
+      }
+      darkNodes.forEach(n=>{
+        uctx.beginPath(); uctx.arc(n.x,n.y,1.9,0,Math.PI*2);
+        uctx.fillStyle='rgba(192,132,252,0.85)'; uctx.shadowColor='#a855f7'; uctx.shadowBlur=14; uctx.fill(); uctx.shadowBlur=0;
+      });
+    }
+
+    particles.forEach(p=>{
+      if(scaleExp<-12){p.vx+=(Math.random()-0.5)*0.7; p.vy+=(Math.random()-0.5)*0.7;}
+      else if(scaleExp>12){
+        const cx=universeW/2, cy=universeH/2, dx=p.x-cx, dy=p.y-cy, dist=Math.hypot(dx,dy)+0.1;
+        const f=0.00028*(scaleExp-10); p.vx+=-dy/dist*f; p.vy+=dx/dist*f;
+        p.vx+=(Math.random()-0.5)*0.02; p.vy+=(Math.random()-0.5)*0.02;
+      }else{p.vx+=(Math.random()-0.5)*0.05; p.vy+=(Math.random()-0.5)*0.05;}
+      if(p.type==='ep'){p.vx*=1.015; p.vy*=1.015;}
+      if(p.type==='dust'){p.vx*=0.985; p.vy*=0.985;}
+      p.vx*=0.992; p.vy*=0.992; p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=universeW; if(p.x>universeW)p.x=0; if(p.y<0)p.y=universeH; if(p.y>universeH)p.y=0;
+      uctx.beginPath(); uctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      uctx.fillStyle=p.color; uctx.globalAlpha=p.type==='dust'?0.88:0.92;
+      uctx.shadowColor=p.color; uctx.shadowBlur=10; uctx.fill(); uctx.shadowBlur=0; uctx.globalAlpha=1;
+    });
+    requestAnimationFrame(animateUniverse);
+  }
+
+  function setPreset(name){
+    const p=presets[name]; scaleSlider.value=p.scale;
+    hydrogen.value=p.hydrogen; helium.value=p.helium; dust.value=p.dust; darkMatter.value=p.dark; ep.value=p.ep;
+    updateMixDisplays(); updateScaleDisplay(); updateParticlesFromMix();
+  }
+
+  document.querySelectorAll('.preset').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); setPreset(btn.dataset.preset);
+    });
+  });
+
+  [hydrogen,helium,dust,darkMatter,ep].forEach(s=>{
+    s.addEventListener('input',()=>{document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active')); updateMixDisplays(); updateParticlesFromMix(); updateLearn(); updateDataDisplay();});
+  });
+  scaleSlider.addEventListener('input',()=>{document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active')); updateScaleDisplay();});
+
+  openDataBtn.addEventListener('click',()=>{mode='open'; openDataBtn.classList.add('active'); liveSimBtn.classList.remove('active'); chipMode.innerHTML='<b>Mode:</b> Open Data'; updateDataDisplay();});
+  liveSimBtn.addEventListener('click',()=>{mode='live'; liveSimBtn.classList.add('active'); openDataBtn.classList.remove('active'); chipMode.innerHTML='<b>Mode:</b> Live Simulation'; updateDataDisplay();});
+
+  window.addEventListener('resize',()=>{resizeStars(); resizeUniverse(); updateParticlesFromMix();});
+
+  // Init
+  resizeStars(); resizeUniverse(); updateMixDisplays(); updateScaleDisplay(); updateParticlesFromMix(); animateStars(); animateUniverse(); updateDataDisplay(); setPreset('human');
+});
+</script>
+</body>
+</html>
