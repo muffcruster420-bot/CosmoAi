@@ -1,10 +1,10 @@
 # CosmoAi: Fully Automated Dark Matter Mapping
 
-by Jesse Shangraw â€¢ Kingston, Ontario
+by Jesse Shangraw â€” Kingston, Ontario
 
-**Universe is unfolding... CERN Ã— VOYAGER**
+**Universe is unfolding... CERN â†’ VOYAGER**
 
-CosmoAi lets anyone see how big the universe really is â€” from Planck scale (10â»Â³âµ m) to the observable universe (10Â²â· m) â€” and watch it unfold in front of them.
+CosmoAi lets anyone see how big the universe really is â€” from Planck scale (10^-35 m) to the observable universe (10^27 m) â€” and watch it unfold in front of them.
 
 Mix particles, gases, dust, and dark matter. Use real open data or live simulation. Input your own numbers and CosmoAi will search, sort, pack, train, and learn â€” all on its own.
 
@@ -27,6 +27,11 @@ Open `index.html` in any browser â€” no install, no API keys, runs locally.
 CERN shows us the smallest collisions. Voyager shows us the edge of the heliosphere. Dark matter mapping shows us the invisible scaffold. CosmoAi puts them together so anyone can input numbers and watch the universe build itself.
 
 *Built May 18, 2026 â€” following the Shangraw Gap work on 45-Hz brain coherence*
+
+### v2 â€” Real Data Live (May 22, 2026)
+CosmoAi now trains on **1,000 SDSS DR18 galaxies**. The Shangraw Gap (Gamma>2) isolates the top 5% densest filament regions â€” the same coherence principle measured at 45 Hz in human brainwaves, now applied to dark matter scaffolding.
+
+Toggle "Use Real SDSS Data" in the demo to switch from synthetic to real universe.
 
 **AI Detector (new):**
 ```bash
