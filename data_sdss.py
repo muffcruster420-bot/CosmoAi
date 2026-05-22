@@ -20,3 +20,5 @@ def load_sdss_sample(n=1000):
         'type': np.random.choice(['GALAXY', 'QSO', 'STAR'], n, p=[0.85, 0.1, 0.05])
     })
     return df
+def load_sdss():
+    return load_sdss_sample()
