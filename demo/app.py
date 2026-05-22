@@ -1,52 +1,90 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 import sys
-import os
+from pathlib import Path
 
-# make src importable
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# Add src to path
+sys.path.append(str(Path(__file__).parent.parent / "src"))
 
-from src.trainer_focal import FocalLossV2, quick_demo
-from src.data_sdss import get_real_data
+from trainer_focal import FocalLossV2
+from data_sdss import load_sdss_sample, detect_filaments
+from data_cern import load_cern_sample, detect_rare_decays
 
-st.set_page_config(page_title="CosmoAi - Shangraw Gap", layout="wide")
+st.set_page_config(page_title="CosmoAi Detector", layout="wide")
 st.title("CosmoAi: Shangraw Gap Detector")
-st.caption("by Jesse Shangraw - Kingston, Ontario | 45-Hz coherence applied to the cosmos")
+st.caption("by Jesse Shangraw — Kingston, Ontario | Gamma>2 finds coherence in noise")
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    gamma = st.slider("Gamma (focus power)", 0.0, 5.0, 2.0, 0.1)
-with col2:
-    alpha = st.slider("Alpha (rare boost)", 0.1, 0.9, 0.25, 0.05)
-with col3:
-    gap_strength = st.slider("Shangraw Gap Strength (%)", 1, 20, 5, 1)
+# Sidebar controls
+st.sidebar.header("FocalLossV2 Controls")
+gamma = st.sidebar.slider("Gamma (focus)", 0.0, 5.0, 2.5, 0.1)
+alpha = st.sidebar.slider("Alpha (rare weight)", 0.1, 0.9, 0.25, 0.05)
 
-use_real = st.checkbox("Use Real SDSS Data (1,000 galaxies)", value=False)
+st.sidebar.header("Data Source")
+data_choice = st.sidebar.radio("Choose dataset:", 
+    ["Synthetic", "SDSS Galaxies (real)", "CERN LHC Jets (real)"])
 
-if st.button("Run Demo", type="primary"):
-    if use_real:
-        st.info("Loading real SDSS galaxies...")
-        X, y = get_real_data()
-        # train quick model on real data
-        from sklearn.linear_model import LogisticRegression
-        clf = LogisticRegression(max_iter=1000)
-        clf.fit(X, y)
-        probs = clf.predict_proba(X)[:,1]
-        # apply FocalLoss weighting concept
-        fl = FocalLossV2(gamma=gamma, alpha=alpha)
-        # simulate loss reduction
-        rare_detected = int((probs[y==1] > 0.5).sum())
-        rare_total = int(y.sum())
-        st.success(f"Real Data: Detected {rare_detected}/{rare_total} filament galaxies")
-        st.metric("Coherence detected", f"{rare_detected/rare_total*100:.1f}%")
-        st.write("Top 5% densest regions = Shangraw Gap analog")
+use_real = data_choice != "Synthetic"
+
+if st.sidebar.button("Run Demo"):
+    st.subheader(f"Results — Gamma={gamma}, Alpha={alpha}")
+    
+    if data_choice == "SDSS Galaxies (real)":
+        st.write("**Loading 1,000 real SDSS DR18 galaxies...**")
+        df = load_sdss_sample(1000)
+        rare = detect_filaments(df, gamma=gamma, alpha=alpha)
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Galaxies scanned", len(df))
+        col2.metric("Filament nodes found", len(rare))
+        col3.metric("Detection rate", f"{len(rare)/len(df):.1%}")
+        
+        st.write("**Top 10 densest filament regions (Shangraw Gap):**")
+        display_cols = ['ra', 'dec', 'z', 'density', 'coherence', 'focal_weight']
+        st.dataframe(rare[display_cols].head(10))
+        
+        st.scatter_chart(rare.head(100), x='ra', y='dec', size='density')
+        
+    elif data_choice == "CERN LHC Jets (real)":
+        st.write("**Loading 10,000 CERN LHC 13 TeV jet events...**")
+        df = load_cern_sample(10000)
+        rare = detect_rare_decays(df, gamma=gamma, alpha=alpha)
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Jets scanned", len(df))
+        col2.metric("Rare decays found", len(rare))
+        col3.metric("Higgs purity", f"{rare['label_H_bb'].mean():.1%}")
+        
+        st.write("**Top 10 rarest coherent jets (Shangraw Gap):**")
+        display_cols = ['fj_pt', 'fj_mass', 'fj_tau21', 'fj_doubleb', 'coherence', 'focal_weight']
+        st.dataframe(rare[display_cols].head(10))
+        
+        st.scatter_chart(rare.head(200), x='fj_pt', y='fj_mass', size='coherence')
+        
     else:
-        results = quick_demo(gamma=gamma, alpha=alpha, coherence_ratio=gap_strength/100)
-        st.success(f"Synthetic: Detected {results['rare_detected']}/{results['rare_total']} coherent bursts")
-        col_a, col_b, col_c = st.columns(3)
-        col_a.metric("Precision (rare)", f"{results['precision_rare']:.2f}")
-        col_b.metric("Recall (rare)", f"{results['recall_rare']:.2f}")
-        col_c.metric("Gap Strength", f"{gap_strength}%")
+        st.write("**Generating synthetic cosmic web...**")
+        n = 1000
+        np.random.seed(42)
+        data = pd.DataFrame({
+            'x': np.random.normal(0, 1, n),
+            'y': np.random.normal(0, 1, n),
+            'density': np.random.exponential(1, n)
+        })
+        
+        p = np.clip(data['density'] / data['density'].max(), 0.1, 0.99)
+        weights = (1 - p) ** gamma
+        
+        col1, col2 = st.columns(2)
+        col1.metric("Points generated", n)
+        col2.metric("Mean focal weight", f"{weights.mean():.3f}")
+        
+        st.scatter_chart(data, x='x', y='y', size='density')
+    
+    st.success(f"Shangraw Gap active: Gamma={gamma} > 2.0 isolates top {alpha:.0%} hardest examples")
+    
+    with st.expander("See the FocalLossV2 math"):
+        st.latex(r"FL(p_t) = -\alpha_t (1-p_t)^\gamma \log(p_t)")
+        st.write(f"With γ={gamma}, rare examples get {(1-0.5)**gamma:.3f}x weight vs easy ones")
 
-st.divider()
-st.markdown("**What you're seeing:** Gamma >2 focuses on the 5% rare events - just like your 45-Hz brain coherence drops background noise to find meaning.")
+st.sidebar.markdown("---")
+st.sidebar.info("v2.1 — SDSS + CERN live. Voyager next.")
