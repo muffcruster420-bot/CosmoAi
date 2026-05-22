@@ -15,4 +15,8 @@ def load_cern_higgs():
         'diphoton_mass_GeV': np.round(mass, 1),
         'events': np.round(counts).astype(int)
     })
-    return df.set_index('diphoton_mass_GeV')['events']
+    return df.set_index('diphoton_mass_GeV')[
+    
+    'events']
+def load_cern():
+    return load_cern_higgs()
