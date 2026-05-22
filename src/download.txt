@@ -1,0 +1,84 @@
+"""
+src/data_cern.py — CERN LHC Open Data loader for CosmoAi
+Jesse Shangraw — Kingston, Ontario
+Uses ATLAS/CMS 13 TeV Higgs-to-bb jet tagging sample
+Same Shangraw Gap principle: find rare coherent decays in noise
+"""
+
+import pandas as pd
+import numpy as np
+from pathlib import Path
+
+def load_cern_sample(n=5000, data_path="data/cern_jets_sample.csv"):
+    """
+    Load CERN LHC jet data. If real CSV exists, use it.
+    Otherwise generate synthetic Higgs/QCD sample matching real distributions.
+    """
+    path = Path(data_path)
+    if path.exists():
+        df = pd.read_csv(path)
+        print(f"[CERN] Loaded {len(df)} real jet events from {path}")
+    else:
+        # Synthetic fallback — matches CMS Hbb tagging features
+        np.random.seed(42)
+        # 95% QCD background, 5% Higgs signal (rare!)
+        n_qcd = int(n * 0.95)
+        n_higgs = n - n_qcd
+        
+        qcd = pd.DataFrame({
+            'fj_pt': np.random.exponential(300, n_qcd) + 200,
+            'fj_mass': np.random.normal(80, 25, n_qcd),
+            'fj_tau21': np.random.beta(5, 2, n_qcd),  # QCD = 1-prong
+            'fj_doubleb': np.random.beta(1, 5, n_qcd),
+            'label_H_bb': 0,
+            'sample_isQCD': 1
+        })
+        
+        higgs = pd.DataFrame({
+            'fj_pt': np.random.exponential(350, n_higgs) + 250,
+            'fj_mass': np.random.normal(125, 15, n_higgs),  # Higgs mass peak
+            'fj_tau21': np.random.beta(2, 5, n_higgs),  # Hbb = 2-prong
+            'fj_doubleb': np.random.beta(5, 1.5, n_higgs),
+            'label_H_bb': 1,
+            'sample_isQCD': 0
+        })
+        
+        df = pd.concat([qcd, higgs]).sample(frac=1).reset_index(drop=True)
+        print(f"[CERN] Generated synthetic {len(df)} jet events (5% Higgs signal)")
+    
+    # Coherence score — Shangraw Gap applied to particle jets
+    # High mass + low tau21 + high doubleb = Higgs coherence
+    mass_norm = np.clip((df['fj_mass'] - 50) / 100, 0, 1)
+    tau_coherence = 1 - df['fj_tau21']  # invert: low tau21 = coherent
+    btag = df['fj_doubleb']
+    
+    df['coherence'] = 0.4*mass_norm + 0.4*tau_coherence + 0.2*btag
+    
+    return df
+
+def detect_rare_decays(df, gamma=2.5, alpha=0.25):
+    """
+    Apply FocalLossV2 logic to find rare Higgs decays in QCD noise
+    gamma > 2 = Shangraw Gap — focuses on hardest 5%
+    """
+    # Use coherence as "prediction confidence"
+    p = df['coherence'].values
+    
+    # Focal weight
+    weight = (1 - p) ** gamma
+    
+    # Top alpha% hardest examples
+    threshold = np.quantile(weight, 1 - alpha)
+    rare_mask = weight >= threshold
+    
+    rare_jets = df[rare_mask].copy()
+    rare_jets['focal_weight'] = weight[rare_mask]
+    
+    return rare_jets.sort_values('focal_weight', ascending=False)
+
+if __name__ == "__main__":
+    df = load_cern_sample(10000)
+    rare = detect_rare_decays(df, gamma=2.5)
+    print(f"Found {len(rare)} rare coherent jets out of {len(df)}")
+    print(f"Higgs purity in rare set: {rare['label_H_bb'].mean():.1%}")
+    print(f"vs overall: {df['label_H_bb'].mean():.1%}")
