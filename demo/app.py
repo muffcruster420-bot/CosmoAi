@@ -1,16 +1,17 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.express as px
 
 from data_sdss import load_sdss_sample
 from data_cern import load_cern_higgs
 from data_voyager import get_voyager_status
 
-st.set_page_config(page_title="CosmoAi v2.2", layout="wide")
+st.set_page_config(page_title="CosmoAi v2.3", layout="wide")
 st.title("🛰️ CosmoAi – Live Space Data")
-st.caption("v2.2 • CERN Open Data + NASA Voyager • Kingston, ON")
+st.caption("v2.3 • Shangraw Gap Detector • Kingston, ON")
 
-tab1, tab2, tab3 = st.tabs(["🌌 SDSS Galaxies", "⚛️ CERN Higgs", "🚀 Voyager 1 & 2"])
+tab1, tab2, tab3, tab4 = st.tabs(["🌌 SDSS", "⚛️ CERN", "🚀 Voyager", "🔍 Shangraw Gap"])
 
 with tab1:
     df = load_sdss_sample()
@@ -26,4 +27,19 @@ with tab3:
     c1, c2 = st.columns(2)
     c1.metric("Voyager 1", f"{v1['distance_au']:.2f} AU")
     c2.metric("Voyager 2", f"{v2['distance_au']:.2f} AU")
-    st.json(v)
+
+with tab4:
+    st.subheader("Shangraw Gap Detector")
+    df = load_sdss_sample(2000)
+    zs = np.sort(df["z"].values)
+    diffs = np.diff(zs)
+    threshold = np.median(diffs) * 2.5
+    gap_idx = np.where(diffs > threshold)[0]
+
+    fig = px.scatter(x=zs, y=np.zeros_like(zs), title="Redshift Distribution with Gaps", labels={"x":"Redshift (z)", "y":""})
+    fig.update_traces(marker=dict(size=4, color="cyan"))
+    for i in gap_idx:
+        fig.add_vrect(x0=zs[i], x1=zs[i+1], fillcolor="red", opacity=0.3, annotation_text=f"Gap {i+1}", annotation_position="top")
+    st.plotly_chart(fig, use_container_width=True)
+    st.write(f"Detected **{len(gap_idx)} gaps** with threshold Δz > {threshold:.4f}")
+    st.caption("Your detector visualized — red zones are where the universe goes quiet")
