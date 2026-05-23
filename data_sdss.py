@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 
-def load_sdss_sample(n=1000):
+df = load_sdss_sample(500)
     """Return a sample of galaxies mimicking SDSS DR18"""
     np.random.seed(42)
     ra = np.random.uniform(0, 360, n)
