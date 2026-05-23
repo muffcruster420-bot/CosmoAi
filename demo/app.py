@@ -5,7 +5,12 @@ from data_sdss import load_sdss_sample
 from data_cern import load_cern_higgs
 from data_voyager import get_voyager_status
 
-st.set_page_config(page_title="CosmoAi v2.7", layout="wide")
+st.set_page_configst.markdown("""
+<style>
+    .stApp { background-color: #000000; }
+    footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)(page_title="CosmoAi v2.7", layout="wide")
 st.title("🛰️ CosmoAi – Live Space Data")
 st.caption("v2.7 • Shangraw Gap Detector • Kingston, ON")
 
