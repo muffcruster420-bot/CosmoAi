@@ -5,14 +5,19 @@ from data_sdss import load_sdss_sample
 from data_cern import load_cern_higgs
 from data_voyager import get_voyager_status
 
-st.set_page_configst.markdown("""
+st.set_page_config(page_title="CosmoAi v2.8", layout="wide")
+
+st.markdown("""
 <style>
-    .stApp { background-color: #000000; }
+   .stApp { background-color: #000000; }
+   .main { background-color: #000000; }
     footer {visibility: hidden;}
+    header {visibility: hidden;}
 </style>
-""", unsafe_allow_html=True)(page_title="CosmoAi v2.7", layout="wide")
-st.title("🛰️ CosmoAi – Live Space Data")
-st.caption("v2.7 • Shangraw Gap Detector • Kingston, ON")
+""", unsafe_allow_html=True)
+
+st.title("🛰️ CosmoAi - Live Space Data")
+st.caption("v2.8 • Shangraw Gap Detector • Kingston, ON")
 
 tab1, tab2, tab3, tab4 = st.tabs(["🌌 SDSS", "⚛️ CERN", "🚀 Voyager", "🔍 Shangraw Gap"])
 
@@ -34,10 +39,10 @@ with tab4:
     if st.button("🔄 Refresh sky"):
         st.rerun()
 
-    df = load_sdss_sample(2000)
+    df = load_sdss_sample(500)
     zs = np.sort(df["z"].values)
     diffs = np.diff(zs)
-    threshold = np.median(diffs) * 2.5
+    threshold = np.median(diffs) * 5.0
     gaps = np.where(diffs > threshold)[0]
 
     plot_df = pd.DataFrame({"redshift": zs, "galaxies": np.random.rand(len(zs))*0.1})
