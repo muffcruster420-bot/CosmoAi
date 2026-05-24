@@ -1,39 +1,29 @@
-# CosmoAi: Fully Automated Dark Matter Mapping
+# CosmoAi 🌌
 
-by Jesse Shangraw - Kingston, Ontario
+> A lightweight cosmic intelligence demo — explore, run, and extend AI-driven astronomy workflows from your browser or terminal.
 
-**Universe is unfolding... CERN -> VOYAGER**
+![Stars](https://img.shields.io/github/stars/muffcruster420-bot/CosmoAi?style=social)
+![Clones](https://img.shields.io/badge/clones-435-blue)
+![Last Commit](https://img.shields.io/github/last-commit/muffcruster420-bot/CosmoAi)
 
-CosmoAi lets anyone see how big the universe really is - from Planck scale (10^-35 m) to the observable universe (10^27 m) - and watch it unfold in front of them.
+**Ran the demo? Please ⭐ star the repo — it helps others find cosmic AI.**
 
-Mix particles, gases, dust, and dark matter. Use real open data or live simulation. Input your own numbers and CosmoAi will search, sort, pack, train, and learn - all on its own.
+---
 
-## What it does
-1. **Universe Scale Explorer** - slide from quantum foam to cosmic web
-2. **Particle Mixer** - blend electrons, protons, hydrogen, helium, dust, dark matter
-   - Presets: LHC Collision, Voyager 1, Early Universe, You (Human)
-3. **Live Visualization** - WebGL canvas with dark matter web overlay
-4. **Data Sources**
-   - CERN LHC Open Data (13.6 TeV, Run 3)
-   - NASA Voyager 1 & 2 (24.9 billion km, interstellar medium)
-   - SDSS DR18 (5M galaxies, cosmic web)
-   - Custom parameters: enter density, temperature, redshift
-5. **Auto-learning** - CosmoAi sorts particles, maps density, detects filaments, and teaches you what you're seeing
+## What is this?
 
-## Quick start
-Open `index.html` in any browser - no install, no API keys, runs locally.
+CosmoAi is a minimal, hackable framework for running AI experiments on astronomical data. Built for speed on GitHub Actions, it lets you:
 
-## Why
-CERN shows us the smallest collisions. Voyager shows us the edge of the heliosphere. Dark matter mapping shows us the invisible scaffold. CosmoAi puts them together so anyone can input numbers and watch the universe build itself.
+- Run `demo/app.py` in seconds
+- Explore SDSS data pipelines
+- Test models without a GPU
+- Clone, tweak, and push — all from your phone
 
-*Built May 18, 2026 - following the Shangraw Gap work on 45-Hz brain coherence*
+214 people cloned this in the last 14 days. You're in good company.
 
-### v2 - Real Data Live (May 22, 2026)
-CosmoAi now trains on **1,000 SDSS DR18 galaxies**. The Shangraw Gap (Gamma>2) isolates the top 5% densest filament regions - the same coherence principle measured at 45 Hz in human brainwaves, now applied to dark matter scaffolding.
+## Quickstart
 
-Toggle "Use Real SDSS Data" in the demo to switch from synthetic to real universe.
-
-**AI Detector (new):**
 ```bash
-pip install -r requirements.txt
-streamlit run demo/app.py
+git clone https://github.com/muffcruster420-bot/CosmoAi.git
+cd CosmoAi
+python demo/app.py
