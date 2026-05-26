@@ -11,8 +11,8 @@ st.caption("🛰 446 clones and counting. Built on a phone in Kingston.")
 
 st.markdown("""
 <style>
- .stApp { background-color: #000000; }
- .main { background-color: #000000; }
+.stApp { background-color: #000000; }
+.main { background-color: #000000; }
   footer {visibility: hidden;}
   header {visibility: hidden;}
 </style>
@@ -21,7 +21,7 @@ st.markdown("""
 st.title("🛰 CosmoAi - Live Space Data")
 st.caption("v2.9 • 446 clones • Shangraw Gap Detector • Kingston, ON")
 
-tab1, tab2, tab3, tab4 = st.tabs(["🛰 SDSS", "⚛️ CERN", "🚀 Voyager", "🔍 Shangraw Gap"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🛰 SDSS", "⚛️ CERN", "🚀 Voyager", "🔍 Shangraw Gap", "📍 My Sky"])
 
 with tab1:
     st.dataframe(load_sdss_sample().head(50), use_container_width=True)
@@ -55,3 +55,12 @@ with tab4:
         st.write("Top gaps (z ranges):")
         for i in gaps[:8]:
             st.code(f"{zs[i]:.4f} → {zs[i+1]:.4f} (Δ={diffs[i]:.4f})")
+
+with tab5:
+    st.subheader("My Sky Tonight — Kingston, ON")
+    st.caption("Lat 44.23°N, Lon 76.48°W • Built on a phone")
+
+    df_sky = load_sdss_sample(200)
+    st.dataframe(df_sky.head(50), use_container_width=True)
+    st.metric("Visible tonight", len(df_sky), "from SDSS sample")
+    st.write("This is your Kingston sky view. Next build: real RA/Dec → altitude.")
