@@ -97,6 +97,39 @@ elif tab == "Universe Map":
     fig = go.Figure(data=go.Scatter3d(x=x,y=y,z=z,mode='markers'))
     st.plotly_chart(fig, use_container_width=True)
 
-else:  # Sandbox
+elif page == "Sandbox":
     st.header("Sandbox")
-    st.write("Test area")
+    tab1, tab2, tab3, tab4 = st.tabs(["AI Chat", "Orbit Sim", "What-If", "Phone Tools"])
+    
+    with tab1:
+        st.subheader("CosmoAi Chat")
+        prompt = st.text_input("Ask about space:", key="sb_chat")
+        if prompt:
+            st.write(f"**You:** {prompt}")
+            # Simple offline-friendly echo - replace with your real AI later
+            st.write(f"**CosmoAi:** That's a great question about '{prompt}'. In v2.9.9, the ISS is at 435km, moving 27,547 km/h. Want me to calculate an orbit?")
+    
+    with tab2:
+        st.subheader("Orbit Simulator")
+        planet = st.selectbox("Planet", ["Earth", "Mars", "Jupiter", "Custom"])
+        altitude = st.slider("Altitude (km)", 200, 40000, 435)
+        import math
+        mu_earth = 398600.4418
+        v = math.sqrt(mu_earth/(6371+altitude))
+        st.metric("Orbital velocity", f"{v:.2f} km/s")
+        st.write(f"At {altitude}km around {planet}, you'd orbit every {2*math.pi*(6371+altitude)/v/60:.1f} minutes")
+    
+    with tab3:
+        st.subheader("What-If Calculator")
+        mass = st.number_input("Spacecraft mass (kg)", 1000, 100000, 5000)
+        thrust = st.number_input("Thrust (N)", 100, 1000000, 50000)
+        accel = thrust/mass
+        st.write(f"Acceleration: {accel:.2f} m/s² ({accel/9.81:.2f} g)")
+    
+    with tab4:
+        st.subheader("Phone Tools (uses your cellular, not internet)")
+        st.write("These open your native apps — works even with data off:")
+        phone = st.text_input("Number", "613-555-0100")
+        st.markdown(f"[📞 Call {phone}](tel:{phone})")
+        st.markdown(f"[💬 Text {phone}](sms:{phone}?body=From CosmoAi: )")
+        st.caption("Note: Streamlit page needs internet to load, but the call/text itself uses cell towers.")
