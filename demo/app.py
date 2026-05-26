@@ -1,4 +1,3 @@
-print("🌌 446 clones and counting. Built on a phone in Kingston.")
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,21 +5,23 @@ from data_sdss import load_sdss_sample
 from data_cern import load_cern_higgs
 from data_voyager import get_voyager_status
 
-st.set_page_config(page_title="CosmoAi v2.8", layout="wide")
+st.set_page_config(page_title="CosmoAi v2.9", layout="wide")
+
+st.caption("🛰 446 clones and counting. Built on a phone in Kingston.")
 
 st.markdown("""
 <style>
-   .stApp { background-color: #000000; }
-   .main { background-color: #000000; }
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+ .stApp { background-color: #000000; }
+ .main { background-color: #000000; }
+  footer {visibility: hidden;}
+  header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🛰️ CosmoAi - Live Space Data")
-st.caption("v2.8 • Shangraw Gap Detector • Kingston, ON")
+st.title("🛰 CosmoAi - Live Space Data")
+st.caption("v2.9 • 446 clones • Shangraw Gap Detector • Kingston, ON")
 
-tab1, tab2, tab3, tab4 = st.tabs(["🌌 SDSS", "⚛️ CERN", "🚀 Voyager", "🔍 Shangraw Gap"])
+tab1, tab2, tab3, tab4 = st.tabs(["🛰 SDSS", "⚛️ CERN", "🚀 Voyager", "🔍 Shangraw Gap"])
 
 with tab1:
     st.dataframe(load_sdss_sample().head(50), use_container_width=True)
