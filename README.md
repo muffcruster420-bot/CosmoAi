@@ -1,22 +1,26 @@
-# CosmoAi 🌌
-A lightweight cosmic intelligence demo — explore, run, and extend AI-driven astronomy workflows from your browser or terminal.
+# 🛰 CosmoAi — Live Space Data
 
-![Stars](https://img.shields.io/github/stars/muffcruster420-bot/CosmoAi) ![Clones](https://img.shields.io/badge/clones-446-blue) ![Last Commit](https://img.shields.io/github/last-commit/muffcruster420-bot/CosmoAi)
+**446 clones and counting. Built on a phone in Kingston, ON.**
 
-> Ran the demo? Please ⭐ star the repo — it helps others find cosmic AI.
+Live visualization of SDSS galaxies, CERN Higgs data, Voyager telemetry, and the Shangraw Gap Detector — all running in Streamlit.
 
-## What is this?
-CosmoAi is a minimal, hackable framework for running AI experiments on astronomical data. Built for speed on GitHub Actions, it lets you:
+### ✨ v2.9.1 — What's New
+- **My Sky Tonight** tab — personalized view for Kingston (44.23°N, 76.48°W)
+- Live clone counter in UI
+- Built 100% on mobile — no laptop, no GPU
 
-- Run `demo/app.py` in seconds
-- Explore SDSS data pipelines
-- Test models without a GPU
-- Clone, tweak, and push — all from your phone
+### 🚀 Features
+- **SDSS** — Sloan Digital Sky Survey sample
+- **CERN** — Higgs boson event visualization  
+- **Voyager** — real-time distance metrics
+- **Shangraw Gap Detector** — LIVE gap detection in redshift data
+- **My Sky** — your local sky view
 
-**446 clones from 218 people in the last 14 days.** You're in good company.
+### 📱 Built on a Phone
+Every commit from v2.9 onward was made on mobile in Kingston. If I can build this on a phone, you can clone it anywhere.
 
-## Quickstart
-```bash
-git clone https://github.com/muffcruster420-bot/CosmoAi.git
-cd CosmoAi
-python demo/app.py
+---
+### 🧠 Related Project
+**[afterlife-workshop](https://github.com/muffcruster420-bot/afterlife-workshop)** — applying the same Shangraw Gap Detector to EEG consciousness data
+- 1,475 clones • Same phone-first philosophy
+- Explore how the same math finds gaps in galaxies *and* brainwaves
