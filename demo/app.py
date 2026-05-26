@@ -1,3 +1,4 @@
+print("🌌 446 clones and counting. Built on a phone in Kingston.")
 import streamlit as st
 import pandas as pd
 import numpy as np
