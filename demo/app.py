@@ -57,7 +57,7 @@ elif tab == "Live Sky - Global":
     st.caption("Pinch to zoom - See what is overhead right now")
     
     st.subheader("Live Ground - Earth from ISS")
-    st.components.v1.iframe("https://www.youtube.com/embed/86YLFOog4GM?autoplay=1&mute=1", height=400)
+    st.components.v1.iframe("https://www.youtube.com/embed/8LX7DnMpIIE?autoplay=1&mute=1", height=500)
     st.caption("ISS live HD - real-time Earth view")
 
 elif tab == "Offline Maps":
