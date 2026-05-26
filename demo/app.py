@@ -4,9 +4,12 @@ import datetime
 
 st.set_page_config(page_title="CosmoAi", layout="wide")
 st.title("CosmoAi")
-st.caption("v2.9.9 - OpenAI enabled")
+st.caption("v2.9.9 - Groq free")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = OpenAI(
+    api_key=st.secrets["GROQ_API_KEY"],
+    base_url="https://api.groq.com/openai/v1"
+)
 
 tab1, tab2, tab3, tab4 = st.tabs(["AI Chat","Orbit Sim","What-If","Phone Tools"])
 
@@ -15,8 +18,10 @@ with tab1:
     p = st.chat_input("Ask about space")
     if p:
         st.session_state.h.append({"role":"user","content":p})
-        r = client.chat.completions.create(model="gpt-4o-mini",
-            messages=[{"role":"system","content":"You are CosmoAi, a helpful space expert."}]+st.session_state.h)
+        r = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role":"system","content":"You are CosmoAi, a helpful space expert. Keep answers short."}] + st.session_state.h[-6:]
+        )
         a = r.choices[0].message.content
         st.session_state.h.append({"role":"assistant","content":a})
     for m in st.session_state.h:
@@ -31,10 +36,12 @@ with tab3:
     st.subheader("What-If")
     q = st.text_input("What if...")
     if q:
-        r = client.chat.completions.create(model="gpt-4o-mini",
-            messages=[{"role":"system","content":"Answer briefly."},{"role":"user","content":q}])
+        r = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role":"system","content":"Answer briefly."},{"role":"user","content":q}]
+        )
         st.write(r.choices[0].message.content)
 
 with tab4:
     st.subheader("Phone Tools")
-    st.write("Flashlight / Compass / Calculator - mobile tools here")
+    st.write("Flashlight / Compass / Calculator - coming soon")
