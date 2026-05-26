@@ -1,6 +1,6 @@
 # 🛰 CosmoAi — Live Space Data
 
-**Built on a phone in Kingston, ON.**
+**Built by a phone for a phone, in Kingston, ON.**
 
 ![Forks](https://img.shields.io/github/forks/muffcruster420-bot/CosmoAi?style=social) ![Stars](https://img.shields.io/github/stars/muffcruster420-bot/CosmoAi?style=social)
 
