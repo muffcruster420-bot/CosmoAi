@@ -1,6 +1,8 @@
 # 🛰 CosmoAi — Live Space Data
 
-**446 clones and counting. Built on a phone in Kingston, ON.**
+   **Built on a phone in Kingston, ON.**
+
+   !![Forks](https://img.shields.io/github/forks/muffcruster420-bot/CosmoAi?style=social) ![Stars](https://img.shields.io/github/stars/muffcruster420-bot/CosmoAi?style=social)
 
 Live visualization of SDSS galaxies, CERN Higgs data, Voyager telemetry, and the Shangraw Gap Detector — all running in Streamlit.
 
