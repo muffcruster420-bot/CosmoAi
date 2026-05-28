@@ -2,8 +2,9 @@
 
 **Built by a phone for a phone, in Kingston, ON.**
 
-![Forks](https://img.shields.io/github/forks/muffcruster420-bot/CosmoAi?style=social) ![Stars](https://img.shields.io/github/stars/muffcruster420-bot/CosmoAi?style=social)
-
+  
+![Forks](https://img.shields.io/github/forks/muffcruster420-bot/CosmoAi)
+![Stars](https://img.shields.io/github/stars/muffcruster420-bot/CosmoAi)
 Live visualization of SDSS galaxies, CERN Higgs data, Voyager telemetry, and the Shangraw Gap Detector — all running in Streamlit.
 
 ### ✨ v2.9.2 — What's New
