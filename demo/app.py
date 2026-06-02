@@ -49,11 +49,11 @@ with tab1:
 with tab2:
     st.subheader("Orbit Sim")
     st.write("ISS: 435 km altitude, 27,547 km/h")
-    st.write("Updated:", datetime.datetime.utcnow().strftime("%H:%M UTC"))
+    st.write("Updated:", datetime.datetime.now(datetime.UTC).strftime("%H:%M UTC"))
 
 with tab3:
     st.subheader("What-If")
-    q = st.text_input("What if...")
+    q = st.text_input("What if...", key="whatif_input")
     if q:
         try:
             r = client.chat.completions.create(
