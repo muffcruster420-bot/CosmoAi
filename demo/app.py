@@ -4,6 +4,10 @@ import datetime
 
 st.set_page_config(page_title="CosmoAi", layout="wide")
 st.title("CosmoAi")
+
+import pathlib
+readme = pathlib.Path("README.md").read_text()
+st.markdown(readme)
 st.caption("v2.9.9 - Groq free")
 
 client = OpenAI(
