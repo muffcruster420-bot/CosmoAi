@@ -48,7 +48,7 @@ with tabs[3]:
     try:
         iss = requests.get("https://api.wheretheiss.at/v1/satellites/25544",timeout=5).json()
         lat,lon,alt = iss["latitude"],iss["longitude"],iss["altitude"]
-        now = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S UTC")
+        now = datetime.datetime.utcnow().strftime("%H:%M:%S UTC")
         st.write(f"**Real-time:** ISS {alt:.0f}km up at {lat:.1f}°,{lon:.1f}° — {now}")
         fig = go.Figure(go.Scattergeo(lat=[44.23,lat],lon=[-76.49,lon],mode="markers+lines"))
         fig.update_geos(projection_type="orthographic")
